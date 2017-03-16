@@ -59,3 +59,30 @@ float** read_mnist(const string& path)
     }
     return data;
 }
+
+float* read_labels(const string& path)
+{
+    float* data = 0;
+    ifstream file (path.c_str(),ios::binary);
+    if (file.is_open())
+    {
+        int magic_number=0;
+        int number_of_images=0;
+        file.read((char*)&magic_number,sizeof(magic_number));
+        magic_number= ReverseInt(magic_number);
+        file.read((char*)&number_of_images,sizeof(number_of_images));
+        number_of_images= ReverseInt(number_of_images);
+
+        data = new float[number_of_images];
+
+        for(int i=0;i<number_of_images;++i)
+        {
+            unsigned char temp=0;
+            file.read((char*)&temp,sizeof(temp));
+            data[i] = (double)temp;
+        }
+    }
+    return data;
+}
+
+#endif

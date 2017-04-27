@@ -12,6 +12,14 @@ float linear_classifier(float*w,float*x){
 	else return -1;
 }
 
+float dist_sq(float*a, float*b){
+	float d=0;
+	for(int i=0; i<784; i++) d+= (a[i]-b[i])*(a[i]-b[i]);
+	return d;
+}
+	float A[100][784];
+	float B[100][784];
+	const int K=10;
 
 int main()
 {
@@ -23,9 +31,52 @@ int main()
 	float** test_images = read_mnist("t10k-images.idx3-ubyte");
 	//les labels des 10000 images pour tester
 	float* test_labels = read_labels("t10k-labels.idx1-ubyte");
-	float*w= new float[784];
 
-	//step 1 : initialization
+// partie k-means
+	int n[K];
+
+	for(int i=0; i<K; i++){
+		n[i]=0;
+		for(int j=0; j<784; j++){
+			A[i][j]=images[i][j];
+			B[i][j]=0;
+		}
+	}
+
+	for(int t=0; t<1000; t++){
+		printf("%u\n",t);
+		for(int i=0; i<K; i++){
+			n[i]=0;
+		for(int j=0; j<784; j++){ B[i][j]=0;}
+	}
+
+	for(int i=0; i<60000; i++){
+		printf("t=%u, i=%u \n",t,i);
+		float mind=-1; int gagnant=0;
+		for(int k=0; k<K; k++) {
+			float d=dist_sq(A[k], images[i]);
+			if(d<= mind || mind==-1){
+				mind=d; gagnant=k;
+			}
+		}
+		for(int j=0; j<784; j++) B[gagnant][j]+= images[i][j];
+		n[gagnant]++;
+	}
+
+	for(int k=0; k<K; k++) {
+		for(int j=0; j<784; j++){
+			A[k][j] = B[k][j]/n[k];
+		}
+			save_jpg(A[k], 28, 28, "%u/%u.jpg", k, t);
+	}
+}
+
+
+
+
+//partie perceptron
+		float*w= new float[784];
+	//step 1 : initialisation
 	for(int i=0; i<784; i++){w[i]=(float)rand()*2/INT_MAX-1;}
 	float gamma = 0.01;
 
